@@ -117,6 +117,7 @@ type PulsarFunctionsCfg struct {
 
 // Configuration - this server's configuration
 type Configuration struct {
+	Name                  string             `json:"name"`
 	PrometheusConfig      PrometheusCfg      `json:"prometheusConfig"`
 	SlackConfig           SlackCfg           `json:"slackConfig"`
 	OpsGenieConfig        OpsGenieCfg        `json:"opsGenieConfig"`
