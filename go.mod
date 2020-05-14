@@ -11,6 +11,7 @@ require (
 	github.com/klauspost/compress v1.9.8 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
+	github.com/newrelic/go-insights v1.0.3
 	github.com/pierrec/lz4 v2.4.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.4.0

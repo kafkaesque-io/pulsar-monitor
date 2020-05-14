@@ -32,8 +32,10 @@ type OpsGenieCfg struct {
 
 // AnalyticsCfg is analytics usage and statistucs tracking configuraiton
 type AnalyticsCfg struct {
-	APIKey       string `json:"apiKey"`
-	IngestionURL string `json:"ingestionUrl"`
+	APIKey            string `json:"apiKey"`
+	IngestionURL      string `json:"ingestionUrl"`
+	InsightsWriteKey  string `json:"insightsWriteKey"`
+	InsightsAccountID string `json:"insightsAccountId"`
 }
 
 // SiteCfg configures general website
@@ -124,7 +126,7 @@ type PulsarFunctionsCfg struct {
 // Configuration - this server's configuration
 type Configuration struct {
 	Name                  string             `json:"name"`
-	AnalyticsCfg          AnalyticsCfg       `json:"analyticsCfg"`
+	AnalyticsConfig       AnalyticsCfg       `json:"analyticsConfig"`
 	PrometheusConfig      PrometheusCfg      `json:"prometheusConfig"`
 	SlackConfig           SlackCfg           `json:"slackConfig"`
 	OpsGenieConfig        OpsGenieCfg        `json:"opsGenieConfig"`

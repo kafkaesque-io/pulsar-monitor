@@ -9,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	insights "github.com/newrelic/go-insights/client"
 )
 
 type ampPayload struct {
@@ -50,6 +52,51 @@ type AmpEvent struct {
 	ADID               string                 `json:"adid,omitempty"`
 }
 
+// AppStartEvent event
+type AppStartEvent struct {
+	EventType string    `json:"eventType"`
+	Timestamp time.Time `json:"timestamp"`
+	Cluster   string    `json:"cluster"`
+	AppName   string    `json:"name"`
+	Env       string    `json:"env"`
+}
+
+// ReportIncidentEvent event
+type ReportIncidentEvent struct {
+	EventType   string    `json:"eventType"`
+	Timestamp   time.Time `json:"timestamp"`
+	Cluster     string    `json:"cluster"`
+	Name        string    `json:"name"`
+	Env         string    `json:"env"`
+	ReportedBy  string    `json:"reportedBy"`
+	Alias       string    `json:"alias"`
+	Masseage    string    `json:"message"`
+	Description string    `json:"description"`
+}
+
+// ClearIncidentEvent event
+type ClearIncidentEvent struct {
+	EventType       string    `json:"eventType"`
+	Timestamp       time.Time `json:"timestamp"`
+	Cluster         string    `json:"cluster"`
+	Env             string    `json:"env"`
+	ReportedBy      string    `json:"reportedBy"`
+	DowntimeSeconds int       `json:"downtimeSeconds"`
+}
+
+// LatencyReportEvent event
+type LatencyReportEvent struct {
+	EventType           string    `json:"eventType"`
+	Timestamp           time.Time `json:"timestamp"`
+	Cluster             string    `json:"cluster"`
+	Name                string    `json:"name"`
+	Env                 string    `json:"env"`
+	LatencyMs           int       `json:"latencyMs"`
+	InOrderDelivery     bool      `json:"inOrderDelivery"`
+	WithinLatencyBudget bool      `json:"withinLatencyBudget"`
+	ErrorMessage        string    `json:"errorMessage"`
+}
+
 const (
 	// event name
 	reportIncident = "Report Incident"
@@ -58,10 +105,26 @@ const (
 	latencyReport  = "Latency Report"
 )
 
+var client *insights.InsertClient
+var env string
+
+// SetupAnalytics initializes and validates the configuration
+func SetupAnalytics() {
+	env = AssignString(os.Getenv("DeployEnv"), "testing")
+	if GetConfig().AnalyticsConfig.InsightsWriteKey == "" || GetConfig().AnalyticsConfig.InsightsAccountID == "" {
+		return
+	}
+	client = insights.NewInsertClient(GetConfig().AnalyticsConfig.InsightsWriteKey, GetConfig().AnalyticsConfig.InsightsAccountID)
+	if err := client.Validate(); err != nil {
+		log.Printf("insights client valiation failed with error %v", err)
+		client = nil
+		return
+	}
+}
+
 func sendEvent(eventType, userID, deviceID string, eventProp map[string]interface{}) error {
-	env := AssignString(os.Getenv("DeployEnv"), "testing")
-	apiKey := GetConfig().AnalyticsCfg.APIKey
-	ingestURL := GetConfig().AnalyticsCfg.IngestionURL
+	apiKey := GetConfig().AnalyticsConfig.APIKey
+	ingestURL := GetConfig().AnalyticsConfig.IngestionURL
 	if apiKey == "" || ingestURL == "" {
 		return fmt.Errorf("no api key set up for analytics config")
 	}
@@ -116,6 +179,16 @@ func sendEvent(eventType, userID, deviceID string, eventProp map[string]interfac
 
 }
 
+// sendToInsights send an event to insights
+func sendToInsights(data interface{}) {
+	if client == nil {
+		return
+	}
+	if err := client.PostEvent(data); err != nil {
+		log.Printf("failed to send to insights with error: %v\n", err)
+	}
+}
+
 // AnalyticsReportIncident reports the beginning of an incident
 func AnalyticsReportIncident(deviceID, alias, message, description string) {
 	go sendEvent(reportIncident, deviceID, deviceID, map[string]interface{}{
@@ -126,14 +199,36 @@ func AnalyticsReportIncident(deviceID, alias, message, description string) {
 		"reportedBy":  "pulsar monitor",
 		"timestamp":   time.Now(),
 	})
+
+	go sendToInsights(ReportIncidentEvent{
+		EventType:   reportIncident,
+		Timestamp:   time.Now(),
+		Cluster:     deviceID,
+		Name:        deviceID,
+		Env:         env,
+		ReportedBy:  "pulsar monitor",
+		Alias:       alias,
+		Masseage:    message,
+		Description: description,
+	})
 }
 
 // AnalyticsClearIncident reports the end of an incident
-func AnalyticsClearIncident(deviceID string, durationSeconds int) {
+func AnalyticsClearIncident(deviceID string, downtimeSeconds int) {
 	go sendEvent(clearIncident, deviceID, deviceID, map[string]interface{}{
-		"cluster":    deviceID,
-		"reportedBy": "pulsar monitor",
-		"timestamp":  time.Now(),
+		"cluster":         deviceID,
+		"reportedBy":      "pulsar monitor",
+		"timestamp":       time.Now(),
+		"downtimeSeconds": downtimeSeconds,
+	})
+
+	go sendToInsights(ClearIncidentEvent{
+		EventType:       clearIncident,
+		Timestamp:       time.Now(),
+		Cluster:         deviceID,
+		Env:             env,
+		ReportedBy:      "pulsar monitor",
+		DowntimeSeconds: downtimeSeconds,
 	})
 }
 
@@ -143,6 +238,14 @@ func AnalyticsAppStart(deviceID string) {
 		"cluster":   deviceID,
 		"name":      "pulsar monitor",
 		"timestamp": time.Now(),
+	})
+
+	go sendToInsights(AppStartEvent{
+		EventType: appStart,
+		Timestamp: time.Now(),
+		Cluster:   deviceID,
+		Env:       env,
+		AppName:   "pulsar monitor",
 	})
 }
 
@@ -157,5 +260,17 @@ func AnalyticsLatencyReport(deviceID, name, errorMessage string, latency int, in
 		"inOrderDelivery":     inOrderDelivery,
 		"withinLatencyBudget": withinLatencyBudget,
 		"error":               errorMessage,
+	})
+
+	go sendToInsights(LatencyReportEvent{
+		EventType:           latencyReport,
+		Timestamp:           time.Now(),
+		Cluster:             deviceID,
+		Name:                name,
+		Env:                 env,
+		LatencyMs:           latency,
+		InOrderDelivery:     inOrderDelivery,
+		WithinLatencyBudget: withinLatencyBudget,
+		ErrorMessage:        errorMessage,
 	})
 }
