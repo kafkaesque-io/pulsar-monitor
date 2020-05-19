@@ -97,12 +97,21 @@ type LatencyReportEvent struct {
 	ErrorMessage        string    `json:"errorMessage"`
 }
 
+// HeartbeatEvent event
+type HeartbeatEvent struct {
+	EventType string    `json:"eventType"`
+	Timestamp time.Time `json:"timestamp"`
+	Cluster   string    `json:"cluster"`
+	Env       string    `json:"env"`
+}
+
 const (
 	// event name
 	reportIncident = "Report Incident"
 	clearIncident  = "Clear Incident"
 	appStart       = "App Start"
 	latencyReport  = "Latency Report"
+	heartBeat      = "Heartbeat"
 )
 
 var client *insights.InsertClient
@@ -247,6 +256,15 @@ func AnalyticsAppStart(deviceID string) {
 		Env:       env,
 		AppName:   "pulsar monitor",
 	})
+
+	go sendToInsights(ClearIncidentEvent{
+		EventType:       clearIncident,
+		Timestamp:       time.Now(),
+		Cluster:         deviceID,
+		Env:             env,
+		ReportedBy:      "app start",
+		DowntimeSeconds: 0,
+	})
 }
 
 // AnalyticsLatencyReport reports a monitor starts
@@ -272,5 +290,15 @@ func AnalyticsLatencyReport(deviceID, name, errorMessage string, latency int, in
 		InOrderDelivery:     inOrderDelivery,
 		WithinLatencyBudget: withinLatencyBudget,
 		ErrorMessage:        errorMessage,
+	})
+}
+
+// AnalyticsHeartbeat reports heartbeat
+func AnalyticsHeartbeat(deviceID string) {
+	go sendToInsights(HeartbeatEvent{
+		EventType: heartBeat,
+		Timestamp: time.Now(),
+		Cluster:   deviceID,
+		Env:       env,
 	})
 }

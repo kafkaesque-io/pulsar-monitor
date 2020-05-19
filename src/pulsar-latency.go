@@ -248,6 +248,7 @@ func TestTopicLatency(topicCfg TopicCfg) {
 
 	testName := AssignString(topicCfg.Name, pubSubSubsystem)
 	log.Printf("cluster %s has message latency %v", clusterName, result.Latency)
+	AnalyticsHeartbeat(clusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("cluster %s, %s latency test Pulsar error: %v", clusterName, testName, err)
 		Alert(errMsg)
