@@ -1,4 +1,4 @@
-module gitlab.com/operation-monitor
+module github.com/kafkaesque-io/pulsar-monitor
 
 go 1.13
 
