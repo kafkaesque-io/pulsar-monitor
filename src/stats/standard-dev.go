@@ -35,6 +35,7 @@ func (sd *StandardDeviation) Push(num float64) (float64, bool) {
 	std = math.Sqrt(std / float64(counter))
 	sd.Std = std
 
-	return std, math.Abs(num-sd.Mean) < 2*std
+	// 2σ evaluation only applies to 10 more data samples
+	return std, math.Abs(num-sd.Mean) < 2*std || counter < 10
 
 }

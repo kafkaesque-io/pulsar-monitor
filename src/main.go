@@ -33,7 +33,7 @@ func main() {
 	RunInterval(StartHeartBeat, TimeDuration(cfg.OpsGenieConfig.IntervalSeconds, 240, time.Second))
 	RunInterval(UptimeHeartBeat, 30*time.Second)
 	MonitorSites()
-	SingleTopicLatencyTestThread()
+	TopicLatencyTestThread()
 	WebSocketTopicLatencyTestThread()
 
 	if cfg.PrometheusConfig.ExposeMetrics {

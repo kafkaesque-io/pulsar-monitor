@@ -86,6 +86,9 @@ func PubSubLatency(clusterName, tokenStr, uri, topicName, outputTopic, msgPrefix
 	defer producer.Close()
 
 	subscriptionName := "latency-measure"
+
+	// use the same input topic if outputTopic does not exist
+	// Two topic use case could be for Pulsar function test
 	consumerTopic := AssignString(outputTopic, topicName)
 	consumer, err := client.Subscribe(pulsar.ConsumerOptions{
 		Topic:                       consumerTopic,
@@ -206,8 +209,8 @@ func PubSubLatency(clusterName, tokenStr, uri, topicName, outputTopic, msgPrefix
 	}
 }
 
-// SingleTopicLatencyTestThread tests a message delivery in topic and measure the latency.
-func SingleTopicLatencyTestThread() {
+// TopicLatencyTestThread tests a message delivery in topic and measure the latency.
+func TopicLatencyTestThread() {
 	topics := GetConfig().PulsarTopicConfig
 	log.Println(topics)
 

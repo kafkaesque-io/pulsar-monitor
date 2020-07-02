@@ -117,15 +117,6 @@ type Configuration struct {
 	WebSocketConfig   []WsConfig         `json:"webSocketConfig"`
 }
 
-// ClusterConfig is a single cluster configuration
-type ClusterConfig struct {
-	Cluster         string       `json:"cluster"`
-	SlackConfig     SlackCfg     `json:"slackConfig"`
-	OpsGenieConfig  OpsGenieCfg  `json:"opsGenieConfig"`
-	AnalyticsConfig AnalyticsCfg `json:"analyticsConfig"`
-	Token           string       `json:"token"`
-}
-
 // AlertPolicyCfg is a set of criteria to evaluation triggers for incident alert
 type AlertPolicyCfg struct {
 	// first evalation for a single count
