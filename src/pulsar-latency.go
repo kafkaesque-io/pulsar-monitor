@@ -270,9 +270,9 @@ func TestTopicLatency(topicCfg TopicCfg) {
 		AnalyticsLatencyReport(clusterName, testName, "", int(result.Latency.Milliseconds()), true, false)
 		Alert(errMsg)
 		ReportIncident(clusterName, clusterName, "persisted latency test failure", errMsg, &topicCfg.AlertPolicy)
-	} else if twoStd, within2Sigma := stdVerdict.Push(float64(result.Latency.Milliseconds())); !within2Sigma {
-		errMsg := fmt.Sprintf("cluster %s, %s test message latency %v over two standard deviation %v milli",
-			clusterName, testName, result.Latency, twoStd)
+	} else if stddev, mean, within2Sigma := stdVerdict.Push(float64(result.Latency.Milliseconds())); !within2Sigma {
+		errMsg := fmt.Sprintf("cluster %s, %s test message latency %v over two standard deviation %v ms and mean is %v ms",
+			clusterName, testName, result.Latency, stddev, mean)
 		AnalyticsLatencyReport(clusterName, testName, "", int(result.Latency.Milliseconds()), true, false)
 		Alert(errMsg)
 		ReportIncident(clusterName, clusterName, "persisted latency test failure", errMsg, &topicCfg.AlertPolicy)
