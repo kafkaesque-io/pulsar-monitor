@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -201,4 +202,12 @@ func SingleSlashJoin(a, b string) string {
 		return a + "/" + b
 	}
 	return a + b
+}
+
+// StrToInt converts string to an integer format with a default if inproper value retrieved
+func StrToInt(str string, defaultNum int) int {
+	if i, err := strconv.Atoi(str); err == nil {
+		return i
+	}
+	return defaultNum
 }

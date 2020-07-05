@@ -196,11 +196,11 @@ func WebSocketTopicLatencyTestThread() {
 		log.Println(cfg.Name)
 		cfg.reconcileConfig()
 		go func(t WsConfig) {
-			interval := TimeDuration(t.IntervalSeconds, 60, time.Second)
+			ticker := time.NewTicker(TimeDuration(t.IntervalSeconds, 60, time.Second))
 			TestWsLatency(t)
 			for {
 				select {
-				case <-time.Tick(interval):
+				case <-ticker.C:
 					TestWsLatency(t)
 				}
 			}

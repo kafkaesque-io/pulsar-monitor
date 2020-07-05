@@ -198,13 +198,15 @@ func PubSubLatency(clusterName, tokenStr, uri, topicName, outputTopic, msgPrefix
 		})
 	}
 
+	ticker := time.NewTicker(time.Duration(5*len(payloads)) * time.Second)
+	go ticker.Stop()
 	select {
 	case receiverLatency := <-completeChan:
 		return receiverLatency, nil
 	case reportedErr := <-errorChan:
 		log.Printf("received error %v", reportedErr)
 		return MsgResult{Latency: failedLatency}, reportedErr
-	case <-time.Tick(time.Duration(5*len(payloads)) * time.Second):
+	case <-ticker.C:
 		return MsgResult{Latency: failedLatency}, errors.New("latency measure not received after timeout")
 	}
 }
@@ -217,11 +219,11 @@ func TopicLatencyTestThread() {
 	for _, topic := range topics {
 		log.Println(topic.Name)
 		go func(t TopicCfg) {
-			interval := TimeDuration(t.IntervalSeconds, 60, time.Second)
+			ticker := time.NewTicker(TimeDuration(t.IntervalSeconds, 60, time.Second))
 			TestTopicLatency(t)
 			for {
 				select {
-				case <-time.Tick(interval):
+				case <-ticker.C:
 					TestTopicLatency(t)
 				}
 			}
