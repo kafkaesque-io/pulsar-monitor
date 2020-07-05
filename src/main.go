@@ -50,7 +50,7 @@ func main() {
 	if cfg.PrometheusConfig.ExposeMetrics {
 		log.Printf("start to listen to http port %s", cfg.PrometheusConfig.Port)
 		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(cfg.PrometheusConfig.Port, nil)
+		http.ListenAndServe(AssignString(cfg.PrometheusConfig.Port, ":8089"), nil)
 	}
 	for {
 		select {

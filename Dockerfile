@@ -28,6 +28,6 @@ COPY --from=builder /root/src/pulsar-monitor /app/
 COPY --from=builder /root/config/kesque-pulsar.cert /etc/ssl/certs/ca-bundle.crt
 
 # Copy debug tools
-COPY --from=builder /go/bin/gops /root/bin
+COPY --from=builder /go/bin/gops /app/gops
 
 ENTRYPOINT ./pulsar-monitor ./runtime.yml
