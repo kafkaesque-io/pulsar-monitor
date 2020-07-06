@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/kafkaesque-io/pulsar-monitor/src/stats"
 )
 
 const (
@@ -21,9 +20,6 @@ const (
 
 var (
 	clients = make(map[string]pulsar.Client)
-
-	// key is the cluster name
-	clusterStdStore = make(map[string]*stats.StandardDeviation)
 )
 
 // MsgResult stores the result of message test
@@ -240,12 +236,7 @@ func TestTopicLatency(topicCfg TopicCfg) {
 	}
 	clusterName := adminURL.Hostname()
 
-	stdVerdict, ok := clusterStdStore[clusterName]
-	if !ok {
-		std := stats.NewStandardDeviation(clusterName)
-		clusterStdStore[clusterName] = &std
-		stdVerdict = &std
-	}
+	stdVerdict := GetStdBucket(clusterName)
 
 	token := AssignString(topicCfg.Token, GetConfig().Token)
 	expectedLatency := TimeDuration(topicCfg.LatencyBudgetMs, latencyBudget, time.Millisecond)
