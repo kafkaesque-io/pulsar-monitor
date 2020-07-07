@@ -104,11 +104,20 @@ type WsConfig struct {
 	AlertPolicy     AlertPolicyCfg `json:"AlertPolicy"`
 }
 
+// K8sClusterCfg is configuration to monitor kubernete cluster
+// only to be enabled in-cluster monitoring
+type K8sClusterCfg struct {
+	Enabled       bool           `json:"enabled"`
+	KubeConfigDir string         `json:"kubeConfigDir"`
+	AlertPolicy   AlertPolicyCfg `json:"AlertPolicy"`
+}
+
 // Configuration - this server's configuration
 type Configuration struct {
 	Name              string             `json:"name"`
 	Token             string             `json:"token"`
 	TrustStore        string             `json:"trustStore"`
+	K8sConfig         K8sClusterCfg      `json:"k8sConfig"`
 	AnalyticsConfig   AnalyticsCfg       `json:"analyticsConfig"`
 	PrometheusConfig  PrometheusCfg      `json:"prometheusConfig"`
 	SlackConfig       SlackCfg           `json:"slackConfig"`

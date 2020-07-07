@@ -18,6 +18,8 @@ var (
 
 type complete struct{} //emptry struct as a single for channel
 
+var clusterHealth = ClusterHealth{}
+
 func main() {
 	// runtime.GOMAXPROCS does not the container's CPU quota in Kubernetes
 	// therefore, it requires to be set explicitly
@@ -39,6 +41,7 @@ func main() {
 	SetupAnalytics()
 
 	AnalyticsAppStart(AssignString(cfg.Name, "dev"))
+	MonitorK8sPulsarCluster()
 	RunInterval(PulsarTenants, TimeDuration(cfg.PulsarAdminConfig.IntervalSeconds, 120, time.Second))
 	RunInterval(StartHeartBeat, TimeDuration(cfg.OpsGenieConfig.IntervalSeconds, 240, time.Second))
 	RunInterval(UptimeHeartBeat, 30*time.Second) // fixed 30 seconds for heartbeat
