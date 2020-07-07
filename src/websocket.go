@@ -173,18 +173,19 @@ func TestWsLatency(config WsConfig) {
 
 	result, err := WsLatencyTest(config.ProducerURL, config.ConsumerURL, token)
 	if err != nil {
-		errMsg := fmt.Sprintf("cluster %s, %s latency test Pulsar error: %v", config.Cluster, config.Name, err)
+		errMsg := fmt.Sprintf("cluster %s, %s websocket latency test Pulsar error: %v", config.Cluster, config.Name, err)
 		Alert(errMsg)
 	} else if result.Latency > expectedLatency {
-		errMsg := fmt.Sprintf("cluster %s, %s test message latency %v over the budget %v",
+		stdVerdict.Add(float64(result.Latency.Milliseconds()))
+		errMsg := fmt.Sprintf("cluster %s, %s websocket test message latency %v over the budget %v",
 			config.Cluster, config.Name, result.Latency, expectedLatency)
 		Alert(errMsg)
-		ReportIncident(config.Name, config.Cluster, "persisted latency test failure", errMsg, &config.AlertPolicy)
-	} else if stddev, mean, within2Sigma := stdVerdict.Push(float64(result.Latency.Milliseconds())); !within2Sigma {
+		ReportIncident(config.Name, config.Cluster, "websocket persisted latency test failure", errMsg, &config.AlertPolicy)
+	} else if stddev, mean, within3Sigma := stdVerdict.Push(float64(result.Latency.Milliseconds())); !within3Sigma {
 		errMsg := fmt.Sprintf("cluster %s, websocket test message latency %v over two standard deviation %v ms and mean is %v ms",
 			config.Cluster, result.Latency, stddev, mean)
 		Alert(errMsg)
-		ReportIncident(config.Name, config.Cluster, "persisted latency test failure", errMsg, &config.AlertPolicy)
+		ReportIncident(config.Name, config.Cluster, "websocket persisted latency test failure", errMsg, &config.AlertPolicy)
 
 	} else {
 		log.Printf("websocket pubsub succeeded with latency %v expected latency %v on topic %s, cluster %s\n",

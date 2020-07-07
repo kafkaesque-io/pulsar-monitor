@@ -258,12 +258,13 @@ func TestTopicLatency(topicCfg TopicCfg) {
 		AnalyticsLatencyReport(clusterName, testName, "message delivery out of order", int(result.Latency.Milliseconds()), false, true)
 		Alert(errMsg)
 	} else if result.Latency > expectedLatency {
+		stdVerdict.Add(float64(result.Latency.Milliseconds()))
 		errMsg := fmt.Sprintf("cluster %s, %s test message latency %v over the budget %v",
 			clusterName, testName, result.Latency, expectedLatency)
 		AnalyticsLatencyReport(clusterName, testName, "", int(result.Latency.Milliseconds()), true, false)
 		Alert(errMsg)
 		ReportIncident(clusterName, clusterName, "persisted latency test failure", errMsg, &topicCfg.AlertPolicy)
-	} else if stddev, mean, within2Sigma := stdVerdict.Push(float64(result.Latency.Milliseconds())); !within2Sigma {
+	} else if stddev, mean, within3Sigma := stdVerdict.Push(float64(result.Latency.Milliseconds())); !within3Sigma {
 		errMsg := fmt.Sprintf("cluster %s, %s test message latency %v over two standard deviation %v ms and mean is %v ms",
 			clusterName, testName, result.Latency, stddev, mean)
 		AnalyticsLatencyReport(clusterName, testName, "", int(result.Latency.Milliseconds()), true, false)
