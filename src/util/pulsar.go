@@ -75,17 +75,15 @@ func VerifyMessageByPulsarConsumer(client pulsar.Client, topicName, expectedMess
 			break
 		}
 		consumer.Ack(msg)
-		log.Printf("received message %s and expected message %s", string(msg.Payload()), expectedMessage)
+		// log.Printf("received message %s and expected message %s", string(msg.Payload()), expectedMessage)
 		if expectedMessage == string(msg.Payload()) {
 			log.Printf("expected message received by %s", topicName)
 			completeChan <- &ConsumerResult{
 				InOrderDelivery: true,
 				Timestamp:       time.Now(),
 			}
+			return nil
 		}
-	}
-	completeChan <- &ConsumerResult{
-		Err: fmt.Errorf("consumer Receive() error: %v", err),
 	}
 	return nil
 }
