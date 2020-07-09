@@ -73,18 +73,19 @@ type PulsarAdminRESTCfg struct {
 
 // TopicCfg is topic configuration
 type TopicCfg struct {
-	Name            string         `json:"name"`
-	Token           string         `json:"token"`
-	TrustStore      string         `json:"trustStore"`
-	LatencyBudgetMs int            `json:"latencyBudgetMs"`
-	PulsarURL       string         `json:"pulsarUrl"`
-	TopicName       string         `json:"topicName"`
-	OutputTopic     string         `json:"outputTopic"`
-	IntervalSeconds int            `json:"intervalSeconds"`
-	ExpectedMsg     string         `json:"expectedMsg"`
-	PayloadSizes    []string       `json:"payloadSizes"`
-	NumOfMessages   int            `json:"numberOfMessages"`
-	AlertPolicy     AlertPolicyCfg `json:"AlertPolicy"`
+	Name               string         `json:"name"`
+	Token              string         `json:"token"`
+	TrustStore         string         `json:"trustStore"`
+	NumberOfPartitions int            `json:"numberOfPartitions"`
+	LatencyBudgetMs    int            `json:"latencyBudgetMs"`
+	PulsarURL          string         `json:"pulsarUrl"`
+	TopicName          string         `json:"topicName"`
+	OutputTopic        string         `json:"outputTopic"`
+	IntervalSeconds    int            `json:"intervalSeconds"`
+	ExpectedMsg        string         `json:"expectedMsg"`
+	PayloadSizes       []string       `json:"payloadSizes"`
+	NumOfMessages      int            `json:"numberOfMessages"`
+	AlertPolicy        AlertPolicyCfg `json:"AlertPolicy"`
 }
 
 // WsConfig is configuration to monitor WebSocket pub sub latency

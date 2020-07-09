@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/kafkaesque-io/pulsar-monitor/src/util"
 )
 
 // PulsarMessage is the required message format for Pulsar Websocket message
@@ -166,10 +167,10 @@ func WsLatencyTest(producerURL, subscriptionURL, token string) (MsgResult, error
 
 // TestWsLatency test all clusters' websocket pub sub latency
 func TestWsLatency(config WsConfig) {
-	token := AssignString(config.Token, GetConfig().Token)
-	expectedLatency := TimeDuration(config.LatencyBudgetMs, 2*latencyBudget, time.Millisecond)
+	token := util.AssignString(config.Token, GetConfig().Token)
+	expectedLatency := util.TimeDuration(config.LatencyBudgetMs, 2*latencyBudget, time.Millisecond)
 
-	stdVerdict := GetStdBucket(config.Cluster)
+	stdVerdict := util.GetStdBucket(config.Cluster)
 
 	result, err := WsLatencyTest(config.ProducerURL, config.ConsumerURL, token)
 	if err != nil {
@@ -205,7 +206,7 @@ func WebSocketTopicLatencyTestThread() {
 		log.Println(cfg.Name)
 		cfg.reconcileConfig()
 		go func(t WsConfig) {
-			ticker := time.NewTicker(TimeDuration(t.IntervalSeconds, 60, time.Second))
+			ticker := time.NewTicker(util.TimeDuration(t.IntervalSeconds, 60, time.Second))
 			TestWsLatency(t)
 			for {
 				select {
