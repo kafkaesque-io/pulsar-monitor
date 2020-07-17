@@ -296,12 +296,20 @@ func (c *Client) runningPodCounts(namespace, component string) (int, error) {
 
 	counts := 0
 	for _, item := range pods.Items {
+		containers := 0
+		readyContainers := 0
 		for _, status := range item.Status.ContainerStatuses {
+			// status.Name is container name
 			if status.Ready {
-				counts++
+				readyContainers++
 			}
+			containers++
+		}
+		if containers == readyContainers {
+			counts++
 		}
 	}
+
 	return counts, nil
 }
 

@@ -14,20 +14,22 @@ import (
 // ClusterHealth a cluster health struct
 type ClusterHealth struct {
 	sync.RWMutex
-	Status k8s.ClusterStatusCode
+	Status         k8s.ClusterStatusCode
+	MissingBrokers int
 }
 
 // Get gets the cluster health status
-func (h *ClusterHealth) Get() k8s.ClusterStatusCode {
+func (h *ClusterHealth) Get() (k8s.ClusterStatusCode, int) {
 	h.RLock()
 	h.RUnlock()
-	return h.Status
+	return h.Status, h.MissingBrokers
 }
 
 // Set sets the cluster health status
-func (h *ClusterHealth) Set(status k8s.ClusterStatusCode) {
+func (h *ClusterHealth) Set(status k8s.ClusterStatusCode, offlineBrokers int) {
 	h.Lock()
 	h.Status = status
+	h.MissingBrokers = offlineBrokers
 	h.Unlock()
 }
 
@@ -43,7 +45,7 @@ func EvaluateClusterHealth(client *k8s.Client) error {
 		return err
 	}
 	desc, status := client.EvalHealth()
-	clusterHealth.Set(status.Status)
+	clusterHealth.Set(status.Status, status.BrokerOfflineInstances)
 
 	PromGaugeInt(GetOfflinePodsCounter(k8sZookeeperSubsystem), cluster, status.ZookeeperOfflineInstances)
 	PromGaugeInt(GetOfflinePodsCounter(k8sBookkeeperSubsystem), cluster, status.BookkeeperOfflineInstances)
@@ -54,10 +56,10 @@ func EvaluateClusterHealth(client *k8s.Client) error {
 		errMsg := fmt.Sprintf("cluster %s, k8s pulsar cluster status is unhealthy, error message %s", cluster, desc)
 		Alert(errMsg)
 		if status.Status == k8s.TotalDown {
-			ReportIncident(cluster, cluster, "persisted latency test failure", errMsg, &cfg.AlertPolicy)
+			ReportIncident(cluster, cluster, "kubernete cluster is down, reported by pulsar-monitor", errMsg, &cfg.AlertPolicy)
 		}
 	}
-	log.Printf("k8 cluster status %d", status)
+	log.Printf("k8 cluster status %v", status)
 	return nil
 }
 
