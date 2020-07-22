@@ -10,6 +10,9 @@ import (
 )
 
 // K8s pulsar cluster monitor
+var (
+	lastAlertTime time.Time = time.Now()
+)
 
 // ClusterHealth a cluster health struct
 type ClusterHealth struct {
@@ -54,9 +57,13 @@ func EvaluateClusterHealth(client *k8s.Client) error {
 
 	if status.Status != k8s.OK {
 		errMsg := fmt.Sprintf("cluster %s, k8s pulsar cluster status is unhealthy, error message %s", cluster, desc)
-		Alert(errMsg)
 		if status.Status == k8s.TotalDown {
+			Alert(errMsg)
 			ReportIncident(cluster, cluster, "kubernete cluster is down, reported by pulsar-monitor", errMsg, &cfg.AlertPolicy)
+		} else if time.Since(lastAlertTime) > 1*time.Minute {
+			// tune down the alert verbosity at every minute
+			Alert(errMsg)
+			lastAlertTime = time.Now()
 		}
 	}
 	log.Printf("k8 cluster status %v", status)
