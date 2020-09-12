@@ -26,6 +26,12 @@ jobs:
           fetch-depth: 1
           path: go/src/github.com/kafkaesque-io/pulsar-monitor
 
+      - name: Test unix command
+        run: |
+          echo "test echo"
+          pwd
+          ls
+
       - name: Lint Go Code
         run: |
           echo $PATH
