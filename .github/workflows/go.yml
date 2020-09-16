@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.15
+          go-version: 1.13
 
       - name: Check out code
         uses: actions/checkout@v1
@@ -26,17 +26,9 @@ jobs:
           fetch-depth: 1
           path: go/src/github.com/kafkaesque-io/pulsar-monitor
 
-      - name: Test unix command
-        run: |
-          echo "test echo"
-          pwd
-          ls
-
       - name: Lint Go Code
         run: |
-          echo $PATH
-          which go
-          export PATH=$PATH:$(go env GOPATH)/bin
+          export PATH=$PATH:$(go env GOPATH)/bin # temporary fix. See https://github.com/actions/setup-go/issues/14
           go get -u golang.org/x/lint/golint 
           cd src
           golint ./...
@@ -52,9 +44,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.15
-        env:
-          GOPATH: $HOME/go
+          go-version: 1.13
 
       - name: Check out code
         uses: actions/checkout@v1
@@ -84,6 +74,4 @@ jobs:
       - name: Build Docker Image
         run: |
           pwd
-          ls
-          which docker
           sudo docker build -t pulsar-monitor .

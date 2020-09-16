@@ -339,7 +339,7 @@ func BuildTenantsUsageThread() {
 
 		// monitor and report over limit tenant's usage
 		go func() {
-			alertInterval := util.TimeDuration(GetConfig().TenantUsageConfig.AlertIntervalMinutes, 240, time.Minute)
+			alertInterval := util.TimeDuration(GetConfig().TenantUsageConfig.AlertIntervalMinutes, 120, time.Minute)
 			usageAlertTicker := time.NewTicker(alertInterval)
 			select {
 			case <-usageAlertTicker.C:
