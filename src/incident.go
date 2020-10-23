@@ -296,19 +296,36 @@ func CreateOpsGenieAlert(msg Incident, genieKey string) error {
 		requestID: alertResp.RequestID,
 		createdAt: time.Now(),
 	}
-	// TODO: this is a bad workaround since the alert is not ready immediately by OpsGenie
-	// We should have a go routine for retry
-	time.Sleep(2 * time.Second)
-	incident.alertID, err = getOpsGenieAlertID(incident.requestID, genieKey)
-	if err != nil {
-		return err
-	}
 
 	incidentsLock.Lock()
 	defer incidentsLock.Unlock()
 	incidents[msg.Entity] = incident
 	downtimeTracker[msg.Entity] = incident
+
+	// there is a delay when the alert is created by opsgenie, so we use retry
+	// time out has to be less than the latency time interval
+	go getOpsGenieAlertIDRetry(msg.Entity, incident.requestID, genieKey, 4*time.Second)
 	return nil
+}
+
+func getOpsGenieAlertIDRetry(entity, requestID, genieKey string, timeout time.Duration) {
+	start := time.Now()
+	for time.Since(start) < timeout {
+		time.Sleep(200 * time.Millisecond) //TODO: could have exponatial back off retry
+		alertID, err := getOpsGenieAlertID(requestID, genieKey)
+		if err == nil {
+			incidentsLock.Lock()
+			incident, ok := incidents[entity]
+			if ok {
+				incident.alertID = alertID
+				incidents[entity] = incident
+			}
+			log.Infof("found...")
+			incidentsLock.Unlock()
+			return
+		}
+	}
+	log.Errorf("%s unable to find alert with requestId %s", entity, requestID)
 }
 
 // getOpsGenieAlertID gets alertID from a created alert.
@@ -322,7 +339,6 @@ func getOpsGenieAlertID(requestID, genieKey string) (alertID string, err error) 
 		return "", err
 	}
 
-	log.Infof("geniekey %s\nGet alert opsgenie status code %v", genieKey, resp.StatusCode)
 	if resp.StatusCode > 300 {
 		return "", fmt.Errorf("Get Opsgenie alert returns incorrect status code %d", resp.StatusCode)
 	}
@@ -346,7 +362,7 @@ func CloseOpsGenieAlert(component, alertID string, genieKey string) error {
 	buf, err := json.Marshal(OpsGenieAlertCloseRequest{
 		User:   "pulsar monitor",
 		Source: component,
-		Note:   "automatically resolved the alert (alertId) " + alertID,
+		Note:   "*automatically resolved the alert* (alertId) " + alertID,
 	})
 	if err != nil {
 		return err
