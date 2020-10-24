@@ -39,7 +39,8 @@ var (
 	// this is only applicable when Pulsar Monitor is deployed within a Pulsar cluster
 	downtimeTracker = make(map[string]incidentRecord)
 
-	incidentTrackers = make(map[string]*IncidentAlertPolicy)
+	incidentTrackers     = make(map[string]*IncidentAlertPolicy)
+	incidentTrackersLock = &sync.RWMutex{}
 )
 
 const (
@@ -144,6 +145,8 @@ func newPolicy(component, msg, desc string, eval *AlertPolicyCfg) IncidentAlertP
 }
 
 func trackIncident(component, msg, desc string, eval *AlertPolicyCfg) bool {
+	incidentTrackersLock.Lock()
+	defer incidentTrackersLock.Unlock()
 	if tracker, ok := incidentTrackers[component]; ok {
 		return tracker.report(component, msg, desc)
 	}
@@ -165,6 +168,8 @@ func ReportIncident(component, alias, msg, desc string, eval *AlertPolicyCfg) {
 func ClearIncident(component string) {
 	RemoveIncident(component)
 
+	incidentTrackersLock.Lock()
+	defer incidentTrackersLock.Unlock()
 	if tracker, ok := incidentTrackers[component]; ok {
 		if tracker.clear() == 0 {
 			delete(incidentTrackers, component)

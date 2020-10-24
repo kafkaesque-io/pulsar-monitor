@@ -284,6 +284,7 @@ func testTopicLatency(clusterName, token string, topicCfg TopicCfg) {
 		}
 		AnalyticsLatencyReport(clusterName, testName, "", int(result.Latency.Milliseconds()), true, false)
 		Alert(errMsg)
+		// standard deviation does not generate alerts
 		// ReportIncident(clusterName, clusterName, "persisted latency test failure", errMsg, &topicCfg.AlertPolicy)
 	} else {
 		log.Printf("succeeded to sent %d messages to topic %s on %s test cluster %s\n",
@@ -337,5 +338,6 @@ func testPartitionTopic(clusterName, token string, cfg TopicCfg) {
 		ReportIncident(clusterName, clusterName, "partition topic test has over budget latency", errMsg, &cfg.AlertPolicy)
 	} else {
 		log.Printf("%d partition topics test concluded with latency %v", pt.NumberOfPartitions, latency)
+		ClearIncident(clusterName)
 	}
 }
