@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"os"
+	"strings"
 	"time"
 	"unicode"
+
+	"github.com/kafkaesque-io/pulsar-monitor/src/util"
 
 	"github.com/apex/log"
 	"github.com/ghodss/yaml"
@@ -199,6 +203,7 @@ func ReadConfigFile(configFile string) {
 			Config.Token = string(tokenBytes)
 		}
 	}
+	Config.Token = strings.TrimSuffix(util.AssignString(Config.Token, os.Getenv("PulsarToken")), "\n")
 
 	log.Infof("config %v", Config)
 }
