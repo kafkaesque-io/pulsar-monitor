@@ -37,7 +37,7 @@ type OpsGenieCfg struct {
 	IntervalSeconds int    `json:"intervalSeconds"`
 }
 
-// AnalyticsCfg is analytics usage and statistucs tracking configuraiton
+// AnalyticsCfg is analytics usage and statistucs tracking configuration
 type AnalyticsCfg struct {
 	APIKey            string `json:"apiKey"`
 	IngestionURL      string `json:"ingestionUrl"`
