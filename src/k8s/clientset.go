@@ -183,7 +183,11 @@ func (c *Client) UpdateReplicas() error {
 	if err != nil {
 		return err
 	}
-	c.Proxy.Replicas = *(proxy.Items[0]).Spec.Replicas
+	if len(proxy.Items) == 0 {
+		c.Proxy.Replicas = 0
+	} else {
+		c.Proxy.Replicas = *(proxy.Items[0]).Spec.Replicas
+	}
 
 	zk, err := c.getStatefulSets(DefaultPulsarNamespace, ZookeeperSts)
 	if err != nil {
