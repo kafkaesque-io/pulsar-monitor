@@ -17,7 +17,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/go-retryablehttp v0.6.4
 	github.com/imdario/mergo v0.3.6 // indirect
-	github.com/keybase/go-keychain v1.1.6
+	github.com/keybase/go-keychain v1.1.6 // indirect
 	github.com/klauspost/compress v1.11.3 // indirect
 	github.com/linkedin/goavro/v2 v2.10.0 // indirect
 	github.com/newrelic/go-insights v1.0.3
@@ -30,9 +30,8 @@ require (
 	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9 // indirect
 	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 // indirect
 	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5 // indirect
-	golang.org/x/sys v0.0.0-20201207223542-d4d67f95c62d // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/term v0.0.0-20201207232118-ee85cb95a76b // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	k8s.io/api v0.18.5
 	k8s.io/apimachinery v0.18.5
